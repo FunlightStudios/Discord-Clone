@@ -1,0 +1,62 @@
+<div id="userSettingsModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Benutzereinstellungen</h2>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="settings-sidebar">
+                <div class="settings-nav">
+                    <div class="nav-item active" data-section="account">
+                        <i class="fas fa-user"></i>
+                        Mein Account
+                    </div>
+                    <div class="nav-item" data-section="profile">
+                        <i class="fas fa-id-card"></i>
+                        Profil
+                    </div>
+                    <div class="nav-item" data-section="privacy">
+                        <i class="fas fa-shield-alt"></i>
+                        Privatsphäre & Sicherheit
+                    </div>
+                    <div class="nav-item" data-section="notifications">
+                        <i class="fas fa-bell"></i>
+                        Benachrichtigungen
+                    </div>
+                    <div class="nav-item" data-section="connections">
+                        <i class="fas fa-link"></i>
+                        Verbindungen
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-content">
+                <!-- Account Settings -->
+                <div class="settings-section active" id="account-settings">
+                    <form id="accountSettingsForm">
+                        <div class="form-group">
+                            <label for="username">Benutzername</label>
+                            <input type="text" id="username" name="username" value="{{ current_user.username }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">E-Mail</label>
+                            <input type="email" id="email" name="email" value="{{ current_user.email }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="avatar">Avatar</label>
+                            <div class="avatar-upload">
+                                <img src="{{ url_for('static', filename=current_user.avatar) }}" alt="Current Avatar">
+                                <input type="file" id="avatar" name="avatar" accept="image/*">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn primary">Speichern</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Other settings sections will be added dynamically -->
+            </div>
+        </div>
+    </div>
+</div>

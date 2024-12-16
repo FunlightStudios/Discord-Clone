@@ -1,0 +1,443 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - FunlightChat{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="app-container">
+    <!-- Server List -->
+    <div class="server-list">
+        <div class="server-icon home active" data-server-id="home" title="Home">
+            <i class="fas fa-home"></i>
+        </div>
+        <div class="server-separator"></div>
+        {% for server in servers %}
+        <div class="server-icon" data-server-id="{{ server.id }}" title="{{ server.name }}">
+            {% if server.icon %}
+            <img src="{{ url_for('static', filename=server.icon) }}" alt="{{ server.name }}">
+            {% else %}
+            <div class="server-icon-text">{{ server.name[:2].upper() }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <div class="server-icon add-server" title="Server hinzufügen">
+            <i class="fas fa-plus"></i>
+        </div>
+    </div>
+
+    <!-- Channel/Friends List -->
+    <div class="channel-list">
+        <!-- Home View -->
+        <div id="home-view" class="view {% if current_view == 'home' %}active{% endif %}">
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Find or start a conversation">
+            </div>
+
+            <div class="friends-nav">
+                <div class="nav-item active">
+                    <i class="fas fa-user-friends"></i>
+                    Freunde
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-rocket"></i>
+                    Nitro
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-inbox"></i>
+                    Nachrichtenanfragen
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-shopping-bag"></i>
+                    Shop
+                    <span class="new-badge">NEU</span>
+                </div>
+            </div>
+
+            <div class="direct-messages">
+                <div class="section-header">
+                    <span>DIREKTNACHRICHTEN</span>
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="dm-list" id="dm-list">
+                    <!-- DMs will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Server View -->
+        <div id="server-view" class="view {% if current_view != 'home' %}active{% endif %}">
+            <div class="server-header">
+                <h3 class="server-name"></h3>
+                <div class="server-boost-info">
+                    <span class="boost-level"></span>
+                    <span class="boost-count"></span>
+                </div>
+                <div class="server-actions">
+                    <button class="server-settings" title="Servereinstellungen">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <button class="server-notifications" title="Benachrichtigungen">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                    <button class="server-pins" title="Angepinnte Nachrichten">
+                        <i class="fas fa-thumbtack"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="channels-container">
+                <div class="channels-header">
+                    <span>Text Channels</span>
+                    <button class="add-channel" data-type="text" title="Textkanal erstellen">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+
+                <div class="category-list">
+                    <!-- Categories will be dynamically added here -->
+                </div>
+
+                <div class="channels-header voice-header">
+                    <span>Voice Channels</span>
+                    <button class="add-channel" data-type="voice" title="Sprachkanal erstellen">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+
+                <div class="voice-channels" id="voice-channels">
+                    <!-- Voice channels will be dynamically added here -->
+                </div>
+            </div>
+
+            <div class="member-list">
+                <div class="member-list-header">
+                    <span>Server Members</span>
+                    <div class="member-count"></div>
+                </div>
+                <div class="role-groups">
+                    <!-- Role groups will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="user-controls">
+            <div class="user-info">
+                <img src="{{ url_for('static', filename=current_user.avatar) }}" alt="Avatar" class="user-avatar">
+                <div class="user-details">
+                    <div class="username">{{ current_user.username }}</div>
+                    <div class="status">
+                        <span class="status-dot online"></span>
+                        <span class="status-text">Online</span>
+                    </div>
+                </div>
+            </div>
+            <div class="user-actions">
+                <button class="action-button" title="Mikrofon">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button class="action-button" title="Kopfhörer">
+                    <i class="fas fa-headphones"></i>
+                </button>
+                <button class="action-button" title="Einstellungen">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="chat-area">
+        <!-- Friends View -->
+        <div id="friends-view" style="{% if current_view == 'home' %}display: block{% else %}display: none{% endif %}">
+            <div class="friends-container">
+                <div class="friends-header">
+                    <div class="header-left">
+                        <i class="fas fa-user-friends"></i>
+                        <span>Freunde</span>
+                    </div>
+                    <div class="header-nav">
+                        <div class="nav-item active" data-view="online">Online</div>
+                        <div class="nav-item" data-view="all">Alle</div>
+                        <div class="nav-item" data-view="pending">Ausstehend</div>
+                        <div class="nav-item" data-view="blocked">Blockiert</div>
+                    </div>
+                    <button class="add-friend-btn">Freund hinzufügen</button>
+                </div>
+                
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Suche">
+                </div>
+
+                <div class="friends-content">
+                    <div class="online-count">ONLINE — {{ friends|length }}</div>
+                    
+                    <div class="friends-list">
+                        {% for friend in friends %}
+                        <div class="friend-item">
+                            <img src="{{ friend.avatar }}" alt="{{ friend.username }}" class="friend-avatar">
+                            <div class="friend-info">
+                                <div class="friend-name">{{ friend.username }}</div>
+                                <div class="friend-status">Online</div>
+                            </div>
+                            <div class="friend-actions">
+                                <button class="action-button message" title="Nachricht">
+                                    <i class="fas fa-comment"></i>
+                                </button>
+                                <button class="action-button more" title="Mehr">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if not friends %}
+                    <!-- Empty state -->
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-user-friends"></i>
+                        </div>
+                        <h3>Bisher ist alles ruhig...</h3>
+                        <p>Wenn ein Freund eine Aktivität beginnt – zum Beispiel etwas spielt oder im Sprachchat anfängt – siehst du es hier!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Now Playing Sidebar -->
+            <div class="now-playing-sidebar">
+                <h4>Jetzt aktiv</h4>
+                <div class="activity-content">
+                    <p>Bisher ist alles ruhig...</p>
+                    <div class="subtitle">Wenn ein Freund eine Aktivität beginnt – zum Beispiel etwas spielt oder im Sprachchat anfängt – siehst du es hier!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Server Chat View -->
+        <div id="server-chat" class="view">
+            <div class="chat-header">
+                <div class="channel-info">
+                    <i class="fas fa-hashtag"></i>
+                    <h3 id="current-channel">allgemein</h3>
+                    <span class="channel-topic">Willkommen im Chat!</span>
+                </div>
+                <div class="channel-actions">
+                    <i class="fas fa-bell" title="Benachrichtigungen"></i>
+                    <i class="fas fa-users" title="Mitgliederliste anzeigen"></i>
+                    <i class="fas fa-search" title="Suchen"></i>
+                </div>
+            </div>
+
+            <div class="messages-container" id="messages">
+                <!-- Messages will be dynamically loaded here -->
+            </div>
+
+            <div class="message-input-container">
+                <div class="upload-preview" id="upload-preview"></div>
+                <div class="input-wrapper">
+                    <button class="upload-btn" title="Datei hochladen">
+                        <i class="fas fa-plus-circle"></i>
+                    </button>
+                    <textarea 
+                        id="message-input" 
+                        class="message-input" 
+                        placeholder="Nachricht schreiben..." 
+                        rows="1"
+                    ></textarea>
+                    <button class="emoji-btn" title="Emoji auswählen">
+                        <i class="far fa-smile"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modals -->
+<div id="createServerModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Deinen Server erstellen</h2>
+            <button class="close-modal-btn">&times;</button>
+        </div>
+        
+        <!-- Initial content that will be replaced when selecting a template -->
+        <div id="initialModalContent">
+            <p class="modal-description">
+                Dein Server ist der Ort, wo du und deine Freunde abhängen.
+                Erstelle jetzt deinen eigenen und rede drauflos.
+            </p>
+            
+            <div class="server-options">
+                <!-- Custom Server Option -->
+                <div class="server-option" data-server-template="custom">
+                    <div class="option-icon">
+                        <div class="create-server-icon">
+                            <i class="fas fa-plus"></i>
+                            <i class="fas fa-globe"></i>
+                        </div>
+                    </div>
+                    <div class="option-content">
+                        <h3>Selbst erstellen</h3>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+
+                <div class="template-section">
+                    <h4>MIT EINER VORLAGE STARTEN</h4>
+                    
+                    <!-- Gaming Template -->
+                    <div class="server-option" data-server-template="gaming">
+                        <div class="option-icon">
+                            <div class="template-icon gaming-icon">
+                                <i class="fas fa-gamepad"></i>
+                            </div>
+                        </div>
+                        <div class="option-content">
+                            <h3>Gaming</h3>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+
+                    <!-- School Club Template -->
+                    <div class="server-option" data-server-template="school">
+                        <div class="option-icon">
+                            <div class="template-icon school-icon">
+                                <i class="fas fa-school"></i>
+                            </div>
+                        </div>
+                        <div class="option-content">
+                            <h3>Schulklub</h3>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+
+                    <!-- Study Group Template -->
+                    <div class="server-option" data-server-template="study">
+                        <div class="option-icon">
+                            <div class="template-icon study-icon">
+                                <i class="fas fa-book"></i>
+                            </div>
+                        </div>
+                        <div class="option-content">
+                            <h3>Lerngruppe</h3>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="join-server-section">
+                <p>Hast du schon eine Einladung?</p>
+                <button class="join-server-btn">Tritt einem Server bei</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="create-channel-modal" class="modal hidden">
+    <div class="modal-content">
+        <h2>Channel erstellen</h2>
+        <form id="create-channel-form">
+            <div class="form-group">
+                <label for="channel-name">Channel Name</label>
+                <input type="text" id="channel-name" required>
+            </div>
+            <div class="form-group">
+                <label for="channel-type">Channel Typ</label>
+                <select id="channel-type" required>
+                    <option value="text">Text Channel</option>
+                    <option value="voice">Voice Channel</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" data-close-modal>Abbrechen</button>
+                <button type="submit" class="btn btn-primary">Erstellen</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Category Template -->
+<template id="category-template">
+    <div class="category">
+        <div class="category-header">
+            <i class="fas fa-chevron-down category-toggle"></i>
+            <span class="category-name"></span>
+            <button class="add-channel-to-category" title="Kanal erstellen">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+        <div class="category-channels">
+            <!-- Channels will be dynamically added here -->
+        </div>
+    </div>
+</template>
+
+<!-- Channel Template -->
+<template id="channel-template">
+    <div class="channel">
+        <div class="channel-content">
+            <i class="channel-icon"></i>
+            <span class="channel-name"></span>
+            <div class="channel-badges">
+                <span class="unread-badge hidden"></span>
+                <span class="mention-badge hidden"></span>
+            </div>
+        </div>
+        <div class="channel-controls">
+            <button class="invite-to-channel" title="Zum Kanal einladen">
+                <i class="fas fa-user-plus"></i>
+            </button>
+            <button class="channel-settings" title="Kanaleinstellungen">
+                <i class="fas fa-cog"></i>
+            </button>
+        </div>
+    </div>
+</template>
+
+<!-- Member Template -->
+<template id="member-template">
+    <div class="member">
+        <img class="member-avatar" alt="Avatar">
+        <div class="member-info">
+            <span class="member-name"></span>
+            <span class="member-status"></span>
+        </div>
+        <div class="member-badges">
+            <span class="owner-badge hidden">
+                <i class="fas fa-crown" title="Server Owner"></i>
+            </span>
+            <span class="bot-badge hidden">BOT</span>
+        </div>
+    </div>
+</template>
+
+<!-- Role Group Template -->
+<template id="role-group-template">
+    <div class="role-group">
+        <div class="role-header">
+            <span class="role-name"></span>
+            <span class="role-count"></span>
+        </div>
+        <div class="role-members">
+            <!-- Members will be dynamically added here -->
+        </div>
+    </div>
+</template>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/server.js') }}"></script>
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+{% endblock %}

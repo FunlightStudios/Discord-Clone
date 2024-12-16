@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}{{ current_server.name }} - FunlightChat{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script src="{{ url_for('static', filename='js/server.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="app-container">
+    <!-- Server List -->
+    <div class="server-list">
+        <div class="server-icon home" data-server-id="home" title="Home">
+            <i class="fas fa-home"></i>
+        </div>
+        <div class="server-separator"></div>
+        {% for server in servers %}
+        <div class="server-icon {% if server.id == current_server.id %}active{% endif %}" data-server-id="{{ server.id }}" title="{{ server.name }}">
+            {% if server.icon %}
+            <img src="{{ url_for('static', filename=server.icon) }}" alt="{{ server.name }}">
+            {% else %}
+            <div class="server-icon-text">{{ server.name[:2].upper() }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <div class="server-icon add-server" title="Server hinzufügen">
+            <i class="fas fa-plus"></i>
+        </div>
+    </div>
+
+    <!-- Channel List -->
+    <div class="channel-list">
+        <div class="server-header" data-bs-toggle="modal" data-bs-target="#serverSettingsModal">
+            <h2>{{ current_server.name }}</h2>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+
+        <div class="channels-container">
+            <div class="channel-group">
+                {% for category in current_server.categories %}
+                <div class="category">
+                    <div class="category-header">
+                        <div class="category-title">
+                            <i class="fas fa-chevron-down category-arrow"></i>
+                            <span class="category-name">{{ category.name }}</span>
+                        </div>
+                        {% if current_user.id == current_server.owner_id %}
+                        <button class="category-button" data-bs-toggle="modal" data-bs-target="#createChannelModal" data-category-id="{{ category.id }}">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                    <div class="category-channels">
+                        {% for channel in category.channels %}
+                        <div class="channel-item {% if current_channel and channel.id == current_channel.id %}active{% endif %}" data-channel-id="{{ channel.id }}">
+                            <a href="#" class="channel-link" onclick="loadChannelContent('{{ channel.id }}'); return false;">
+                                {% if channel.type == 'voice' %}
+                                <i class="fas fa-volume-up"></i>
+                                {% else %}
+                                <i class="fas fa-hashtag"></i>
+                                {% endif %}
+                                <span class="channel-name">{{ channel.name }}</span>
+                            </a>
+                            {% if current_user.id == current_server.owner_id %}
+                            <div class="channel-controls">
+                                <button class="channel-button" onclick="editChannel('{{ channel.id }}'); return false;">
+                                    <i class="fas fa-cog"></i>
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- User Controls -->
+        <div class="user-controls">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}">
+                    <div class="user-status online"></div>
+                </div>
+                <div class="user-details">
+                    <div class="user-name">{{ current_user.username }}</div>
+                    <div class="user-tag">#{{ current_user.discriminator }}</div>
+                </div>
+            </div>
+            <div class="user-buttons">
+                <button class="user-button" title="Stummschalten">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button class="user-button" title="Ton deaktivieren">
+                    <i class="fas fa-headphones"></i>
+                </button>
+                <button class="user-button" title="Benutzereinstellungen" data-bs-toggle="modal" data-bs-target="#userSettingsModal">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="chat-area">
+        <div class="chat-header">
+            <div class="chat-header-left">
+                <i class="fas fa-hashtag"></i>
+                <h3>{{ current_channel.name if current_channel else 'Willkommen' }}</h3>
+                {% if current_channel and current_channel.topic %}
+                <div class="channel-topic">{{ current_channel.topic }}</div>
+                {% endif %}
+            </div>
+            <div class="chat-header-right">
+                <div class="header-icons">
+                    <button class="header-button" title="Threads">
+                        <i class="fas fa-hashtag"></i>
+                    </button>
+                    <button class="header-button" title="Benachrichtigungen">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                    <button class="header-button" title="Gepinnte Nachrichten">
+                        <i class="fas fa-thumbtack"></i>
+                    </button>
+                    <button class="header-button" title="Mitgliederliste anzeigen">
+                        <i class="fas fa-users"></i>
+                    </button>
+                </div>
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Suchen">
+                    <button class="search-button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div class="header-icons">
+                    <button class="header-button" title="Posteingang">
+                        <i class="fas fa-inbox"></i>
+                    </button>
+                    <button class="header-button" title="Hilfe">
+                        <i class="fas fa-question-circle"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-content">
+            <div class="messages-container" id="messages">
+                {% if not current_channel %}
+                <div class="welcome-screen">
+                    <h1>Willkommen bei {{ current_server.name }}</h1>
+                    <p>Das ist der Anfang von {{ current_server.name }}.</p>
+                    <div class="welcome-actions">
+                        <button class="welcome-button">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Freunde einladen</span>
+                        </button>
+                        {% if current_user.id == current_server.owner_id %}
+                        <button class="welcome-button" data-bs-toggle="modal" data-bs-target="#serverSettingsModal">
+                            <i class="fas fa-cog"></i>
+                            <span>Server einrichten</span>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="message-input-container">
+            <div class="message-attachments">
+                <button class="attachment-button" title="Datei anhängen">
+                    <i class="fas fa-plus-circle"></i>
+                </button>
+            </div>
+            <div class="message-input" id="message-input" contenteditable="true" 
+                 data-placeholder="Nachricht an #{{ current_channel.name if current_channel else 'allgemein' }}"></div>
+            <div class="message-actions">
+                <button class="action-button" title="GIF">
+                    <i class="fas fa-gift"></i>
+                </button>
+                <button class="action-button" title="Sticker">
+                    <i class="fas fa-sticky-note"></i>
+                </button>
+                <button class="action-button" title="Emoji">
+                    <i class="far fa-smile"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+{% include 'modals/create_channel.html' %}
+{% include 'modals/server_settings.html' %}
+{% include 'modals/create_server.html' %}
+{% include 'modals/user_settings.html' %}
+{% endblock %}

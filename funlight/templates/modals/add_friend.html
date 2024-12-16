@@ -1,0 +1,27 @@
+<div id="addFriendModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Freund hinzufügen</h2>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="addFriendForm">
+                <div class="form-group">
+                    <label for="friendUsername">Benutzername#Tag</label>
+                    <input type="text" id="friendUsername" name="username" required 
+                           placeholder="Gib den Benutzernamen#Tag eines Freundes ein">
+                    <small>BEISPIEL: Jerry#1234</small>
+                </div>
+
+                <div class="form-message hidden">
+                    <!-- Success/Error messages will be shown here -->
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn secondary close-modal">Abbrechen</button>
+                    <button type="submit" class="btn primary">Freundschaftsanfrage senden</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

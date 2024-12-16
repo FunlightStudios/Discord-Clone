@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - FunlightChat{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modal.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="app-container">
+    <!-- Server List -->
+    <div class="server-list">
+        <div class="server-icon home active" data-server-id="home" title="Home">
+            <i class="fas fa-home"></i>
+        </div>
+        <div class="server-separator"></div>
+        {% for server in servers %}
+        <div class="server-icon" data-server-id="{{ server.id }}" title="{{ server.name }}">
+            {% if server.icon %}
+            <img src="{{ url_for('static', filename=server.icon) }}" alt="{{ server.name }}">
+            {% else %}
+            <div class="server-icon-text">{{ server.name[:2].upper() }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <div class="server-icon add-server" title="Server hinzufügen">
+            <i class="fas fa-plus"></i>
+        </div>
+    </div>
+
+    <!-- Friends/DM List -->
+    <div class="channel-list">
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Find or start a conversation">
+        </div>
+
+        <div class="friends-nav">
+            <div class="nav-item active">
+                <i class="fas fa-user-friends"></i>
+                Freunde
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-rocket"></i>
+                Nitro
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-inbox"></i>
+                Nachrichtenanfragen
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-shopping-bag"></i>
+                Shop
+                <span class="new-badge">NEU</span>
+            </div>
+        </div>
+
+        <div class="direct-messages">
+            <div class="section-header">
+                <span>DIREKTNACHRICHTEN</span>
+                <i class="fas fa-plus"></i>
+            </div>
+            <div class="dm-list" id="dm-list">
+                <!-- DMs will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <div class="user-controls">
+            <div class="user-info">
+                <img src="{{ url_for('static', filename=current_user.avatar) }}" alt="Avatar" class="user-avatar">
+                <div class="user-details">
+                    <div class="username">{{ current_user.username }}</div>
+                    <div class="status">
+                        <span class="status-dot online"></span>
+                        <span class="status-text">Online</span>
+                    </div>
+                </div>
+            </div>
+            <div class="user-actions">
+                <button class="action-button" title="Mikrofon">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button class="action-button" title="Kopfhörer">
+                    <i class="fas fa-headphones"></i>
+                </button>
+                <button class="action-button" title="Einstellungen">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="chat-area">
+        <div class="friends-container">
+            <div class="friends-header">
+                <div class="header-left">
+                    <i class="fas fa-user-friends"></i>
+                    <span>Freunde</span>
+                </div>
+                <div class="header-nav">
+                    <div class="nav-item active" data-view="online">Online</div>
+                    <div class="nav-item" data-view="all">Alle</div>
+                    <div class="nav-item" data-view="pending">Ausstehend</div>
+                    <div class="nav-item" data-view="blocked">Blockiert</div>
+                </div>
+                <button class="add-friend-btn">Freund hinzufügen</button>
+            </div>
+            
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Suche">
+            </div>
+
+            <div class="friends-content">
+                <div class="online-count">ONLINE — {{ friends|length }}</div>
+                
+                <div class="friends-list">
+                    {% if friends %}
+                        {% for friend in friends %}
+                        <div class="friend-item">
+                            <img src="{{ friend.avatar }}" alt="{{ friend.username }}" class="friend-avatar">
+                            <div class="friend-info">
+                                <div class="friend-name">{{ friend.username }}</div>
+                                <div class="friend-status">Online</div>
+                            </div>
+                            <div class="friend-actions">
+                                <button class="action-button message" title="Nachricht">
+                                    <i class="fas fa-comment"></i>
+                                </button>
+                                <button class="action-button more" title="Mehr">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <img src="{{ url_for('static', filename='images/empty-friends.svg') }}" alt="No friends">
+                            <h3>Warte auf Freundschaft</h3>
+                            <p>Warte darauf, dass jemand die Freundschaftsanfrage annimmt. Oder füge neue Freunde hinzu!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+{% include 'modals/create_server.html' %}
+{% include 'modals/add_friend.html' %}
+{% include 'modals/user_settings.html' %}
+{% endblock %}

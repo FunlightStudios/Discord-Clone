@@ -1,0 +1,185 @@
+<div id="createServerModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Deinen Server erstellen</h2>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p class="modal-description">
+                Dein Server ist der Ort, wo du und deine Freunde abhängen.
+                Erstelle jetzt deinen eigenen und rede drauflos.
+            </p>
+
+            <div class="template-list">
+                <div class="template-item" data-template="custom">
+                    <div class="template-icon">
+                        <img src="{{ url_for('static', filename='images/server-templates/custom.svg') }}" alt="Selbst erstellen">
+                    </div>
+                    <div class="template-info">
+                        <h3>Selbst erstellen</h3>
+                        <p>Starte mit einem leeren Server und passe ihn an</p>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+
+                <div class="template-section">
+                    <h4>MIT EINER VORLAGE STARTEN</h4>
+                </div>
+
+                <div class="template-item" data-template="gaming">
+                    <div class="template-icon">
+                        <img src="{{ url_for('static', filename='images/server-templates/gaming.svg') }}" alt="Gaming">
+                    </div>
+                    <div class="template-info">
+                        <h3>Gaming</h3>
+                        <p>Erstelle einen Server für deine Gaming-Community</p>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+
+                <div class="template-item" data-template="school">
+                    <div class="template-icon">
+                        <img src="{{ url_for('static', filename='images/server-templates/school.svg') }}" alt="Schulklub">
+                    </div>
+                    <div class="template-info">
+                        <h3>Schulklub</h3>
+                        <p>Ein Ort für deine Schulgemeinschaft</p>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+
+                <div class="template-item" data-template="study">
+                    <div class="template-icon">
+                        <img src="{{ url_for('static', filename='images/server-templates/study.svg') }}" alt="Lerngruppe">
+                    </div>
+                    <div class="template-info">
+                        <h3>Lerngruppe</h3>
+                        <p>Studiere und arbeite mit deinen Kommilitonen</p>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+
+            <div class="join-server-section">
+                <h4>Hast du schon eine Einladung?</h4>
+                <button class="btn secondary join-server-btn">Tritt einem Server bei</button>
+            </div>
+
+            <!-- This form will be shown after selecting a template -->
+            <form id="createServerForm" class="hidden">
+                <div class="form-group">
+                    <label for="serverName">SERVER NAME</label>
+                    <input type="text" id="serverName" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <div class="image-upload">
+                        <label for="serverIcon">
+                            <div class="upload-placeholder">
+                                <i class="fas fa-camera"></i>
+                                <span>ICON HOCHLADEN</span>
+                            </div>
+                        </label>
+                        <input type="file" id="serverIcon" name="icon" accept="image/*" hidden>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn secondary back-btn">Zurück</button>
+                    <button type="submit" class="btn primary">Erstellen</button>
+                </div>
+            </form>
+<div id="createServerModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Deinen Server erstellen</h2>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p class="modal-description">
+                Dein Server ist der Ort, wo du und deine Freunde abhängen.
+                Erstelle jetzt deinen eigenen und rede drauflos.
+            </p>
+
+            <div class="template-list">
+                <div class="template-item" data-template="custom">
+                    <div class="template-icon">
+                        <img src="{{ url_for('static', filename='images/server-templates/custom.svg') }}" alt="Selbst erstellen">
+                    </div>
+                    <div class="template-info">
+                        <h3>Selbst erstellen</h3>
+                        <p>Starte mit einem leeren Server und passe ihn an</p>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+
+                <div class="template-section">
+                    <h4>MIT EINER VORLAGE STARTEN</h4>
+                </div>
+
+                <div class="template-item" data-template="gaming">
+                    <div class="template-icon">
+                        <img src="{{ url_for('static', filename='images/server-templates/gaming.svg') }}" alt="Gaming">
+                    </div>
+                    <div class="template-info">
+                        <h3>Gaming</h3>
+                        <p>Erstelle einen Server für deine Gaming-Community</p>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+
+                <div class="template-item" data-template="school">
+                    <div class="template-icon">
+                        <img src="{{ url_for('static', filename='images/server-templates/school.svg') }}" alt="Schulklub">
+                    </div>
+                    <div class="template-info">
+                        <h3>Schulklub</h3>
+                        <p>Ein Ort für deine Schulgemeinschaft</p>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+
+                <div class="template-item" data-template="study">
+                    <div class="template-icon">
+                        <img src="{{ url_for('static', filename='images/server-templates/study.svg') }}" alt="Lerngruppe">
+                    </div>
+                    <div class="template-info">
+                        <h3>Lerngruppe</h3>
+                        <p>Studiere und arbeite mit deinen Kommilitonen</p>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+
+            <div class="join-server-section">
+                <h4>Hast du schon eine Einladung?</h4>
+                <button class="btn secondary join-server-btn">Tritt einem Server bei</button>
+            </div>
+
+            <!-- This form will be shown after selecting a template -->
+            <form id="createServerForm" class="hidden">
+                <div class="form-group">
+                    <label for="serverName">SERVER NAME</label>
+                    <input type="text" id="serverName" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <div class="image-upload">
+                        <label for="serverIcon">
+                            <div class="upload-placeholder">
+                                <i class="fas fa-camera"></i>
+                                <span>ICON HOCHLADEN</span>
+                            </div>
+                        </label>
+                        <input type="file" id="serverIcon" name="icon" accept="image/*" hidden>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn secondary back-btn">Zurück</button>
+                    <button type="submit" class="btn primary">Erstellen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

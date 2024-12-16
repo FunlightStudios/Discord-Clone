@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Login - FunlightChat{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-form">
+        <h2>Willkommen zurück!</h2>
+        <p>Wir freuen uns, dich wiederzusehen!</p>
+        
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="alert alert-error">
+            {{ messages[0] }}
+        </div>
+        {% endif %}
+        {% endwith %}
+        
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            <div class="form-group">
+                <label class="form-label" for="username">Benutzername</label>
+                <input type="text" id="username" name="username" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="password">Passwort</label>
+                <input type="password" id="password" name="password" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="checkbox-container">
+                    <input type="checkbox" name="remember">
+                    <span class="checkbox-text">Angemeldet bleiben</span>
+                </label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Anmelden</button>
+            
+            <p class="auth-footer">
+                Brauchst du einen Account? 
+                <a href="{{ url_for('auth.register') }}">Registrieren</a>
+            </p>
+        </form>
+    </div>
+</div>
+{% endblock %}

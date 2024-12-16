@@ -1,0 +1,71 @@
+<!-- Server Settings Modal -->
+<div class="modal" id="serverSettingsModal" tabindex="-1" aria-labelledby="serverSettingsModalLabel" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="serverSettingsModalLabel">Servereinstellungen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="serverSettingsForm">
+                    <div class="mb-3">
+                        <label for="serverName" class="form-label">Servername</label>
+                        <input type="text" class="form-control" id="serverName" name="name" 
+                               value="{{ current_server.name }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="serverDescription" class="form-label">Beschreibung</label>
+                        <textarea class="form-control" id="serverDescription" name="description" 
+                                  rows="3">{{ current_server.description or '' }}</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="serverIcon" class="form-label">Server-Icon</label>
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="{{ url_for('static', filename=current_server.icon or 'images/default-server-icon.png') }}" 
+                                 alt="Server Icon" class="server-icon-preview" style="width: 64px; height: 64px; border-radius: 50%;">
+                            <div class="flex-grow-1">
+                                <input type="file" class="form-control" id="serverIcon" name="icon" 
+                                       accept="image/png,image/jpeg,image/gif">
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if current_user.id == current_server.owner_id %}
+                    <div class="mb-3 border-top pt-3">
+                        <h6 class="text-danger">Gefahrenzone</h6>
+                        <button type="button" class="btn btn-outline-danger" id="deleteServerBtn">
+                            Server löschen
+                        </button>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                <button type="button" class="btn btn-primary" id="saveServerSettingsBtn">Speichern</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Server Confirmation Modal -->
+<div class="modal" id="deleteServerConfirmModal" tabindex="-1" aria-labelledby="deleteServerConfirmModalLabel" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteServerConfirmModalLabel">Server löschen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bist du sicher, dass du den Server "{{ current_server.name }}" löschen möchtest?</p>
+                <p class="text-danger">Diese Aktion kann nicht rückgängig gemacht werden!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteServerBtn">Server löschen</button>
+            </div>
+        </div>
+    </div>
+</div>
