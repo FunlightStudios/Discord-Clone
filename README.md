@@ -1,4 +1,4 @@
-# FunlightChat
+# Discord-Clone
 
 A modern chat and communication platform inspired by Discord, built with Python Flask and modern web technologies.
 
