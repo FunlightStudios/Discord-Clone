@@ -2,7 +2,6 @@
 
 A modern chat and communication platform inspired by Discord, built with Python Flask and modern web technologies. 
 
-## NOTE:
 
 # ⚠️ Work in Progress
 This project is under active development and not production-ready yet.
