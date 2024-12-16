@@ -4,8 +4,12 @@ A modern chat and communication platform inspired by Discord, built with Python 
 
 
 # ⚠️ Work in Progress
-This project is under active development and not production-ready yet.
+This project is under active development and not production-ready yet. (Project in German)
 
+## Screenshots
+![Dashboard](SC1.png)
+
+![Server](SC2.png)
 
 ## Features
 
